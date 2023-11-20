@@ -3,10 +3,10 @@ import java.util.Arrays;
 public class TambahanSorting07 {
     public static void main(String[] args) {
         String[][] PemainAtlit = {
-                { "Agos", "Daffa", "Sukiman", "Jaki", "Udin" }, // badminton
-                { "Hafiz", "Aida", "Devan", "Marta", "Moheng" }, // tenisMeja
-                { "Ahmad", "Amel", "Dayat", "Rafli", "Adit" }, // basket
-                { "Vika", "Andre", "Aro", "Erent", "Rara" } // voli
+                { "Agos", "Daffa", "Sukiman", "Jaki", "Udin" }, // Cabang Olahraga badminton
+                { "Hafiz", "Aida", "Devan", "Marta", "Moheng" }, // Cabang OlahragatenisMeja
+                { "Ahmad", "Amel", "Dayat", "Rafli", "Adit" }, // Cabang Olahraga basket
+                { "Vika", "Andre", "Aro", "Erent", "Rara" } // Cabang Olahraga voli
         };
 
         String[] Cabangolahraga = { "Badminton", "Tenis Meja", "Basket", "Bola Voly" };
