@@ -24,6 +24,9 @@ public class NilaiMahasiswaModif07 {
         mingguTertinggi();
         System.out.println("************************************************");
         mahasiswaTertinggi();
+        System.out.println("************************************************");
+        mahasiswaTerendah();
+        System.out.println("************************************************");
     }
 
     public static void inputNamaMahasiswa() {
@@ -78,6 +81,18 @@ public class NilaiMahasiswaModif07 {
             }
         }
     }
+    public static void mahasiswaTerendah() {
+        int minValue = nilaiTerendah(nilai);
+        for (int i = 0; i < nilai.length; i++) {
+            for (int j = 0; j < nilai[0].length; j++) {
+                if (nilai[i][j] == minValue) {
+                    System.out.println("Mahasiswa dengan nilai terendah adalah " + nama[i] +
+                            " dengan nilai " + minValue);
+                }
+            }
+        }
+    }
+
 
     static int nilaiTertinggi(int[][] array) {
         int maxValue = 0;
@@ -91,4 +106,16 @@ public class NilaiMahasiswaModif07 {
         }
         return maxValue;
     }
+static int nilaiTerendah(int[][] array) {
+    int minValue = Integer.MAX_VALUE;
+
+    for (int i = 0; i < array.length; i++) {
+        for (int j = 0; j < array[i].length; j++) {
+            if (array[i][j] < minValue) {
+                minValue = array[i][j];
+            }
+        }
+    }
+    return minValue;
+}
 }
