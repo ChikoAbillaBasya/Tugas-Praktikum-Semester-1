@@ -18,9 +18,24 @@ class User {
     Date tanggalLahir;
     String nik; // Nomor Induk Kependudukan
     Membership membership;
-        public boolean isMember() {
-        return this.membership.isActive;
+
+    Date membershipActivationDate;
+    Date membershipExpirationDate;
+
+    public void activateMembership() {
+        Calendar calendar = Calendar.getInstance();
+        this.membershipActivationDate = calendar.getTime(); // tanggal sekarang
+        calendar.add(Calendar.MONTH, 1); // tambah 1 bulan
+        this.membershipExpirationDate = calendar.getTime();
+        this.membership.isActive = true;
     }
+
+    public boolean isMembershipActive() {
+        Date currentDate = new Date();
+        return this.membership.isActive && currentDate.before(this.membershipExpirationDate);
+    }
+
+
 
     User(String namaPengguna, String sandi, String namaLengkap, String alamat, Date tanggalLahir, String nik) {
         this.namaPengguna = namaPengguna;
@@ -75,7 +90,7 @@ class Membership {
     }
 }
 
-public class App {
+public class App  {
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_GREEN = "\u001B[32m";
@@ -156,6 +171,8 @@ public class App {
         }
     }
 
+    
+
     private static void registerUser(ArrayList<String> namaPengguna, ArrayList<String> sandi, ArrayList<User> users, Scanner input) {
         System.out.println("════════════════════════════════════════════════════════");
         System.out.print("Masukkan Nama Lengkap               : ");
@@ -223,8 +240,10 @@ public class App {
     }
 
 
-    private static void makeBooking(ArrayList<User> users, int[] stockRooms, String[][] bookings, int userIndex, Scanner input) {
+    public static String makeBooking(ArrayList<User> users, int[] stockRooms, String[][] bookings, int userIndex, Scanner input) {
         int hargapermalam = 0, jmlmalam, biayatambahan, totalbiaya;
+
+        String statusReservasi = "gagal";
 
         // Stylized banner for selecting room type
         System.out.println("╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
@@ -266,10 +285,10 @@ public class App {
 
         if (banyakkamar < 1) {
             System.out.println(ANSI_RED + "Kamu tidak bisa memesan 0 kamar" + ANSI_RESET);
-            return;
+            return "gagal";
         } else if (banyakkamar > stockRooms[tipekamar - 1]) {
             System.out.println(ANSI_RED + "Maaf, hanya tersedia " + stockRooms[tipekamar - 1] + " kamar untuk tipe ini." + ANSI_RESET);
-            return;
+            return "gagal";
         }
 
         stockRooms[tipekamar - 1] -= banyakkamar; // Mengurangi ketersediaan kamar berdasarkan jumlah yang dipesan
@@ -312,7 +331,7 @@ public class App {
                 break;
             default:
                 System.out.println(ANSI_RED + "Tipe kamar tidak valid." + ANSI_RESET);
-                return;
+                return "gagal";
         }
 
         bookings[userIndex][1] = "Jumlah Malam      : " + jmlmalam;
@@ -367,7 +386,7 @@ public class App {
                 tambahanLain = false; // Exit the loop if the user chooses to finish
             } else {
                 System.out.println(ANSI_RED + "Tambahan fasilitas tidak valid." + ANSI_RESET);
-                return;
+                return "gagal";
             }
         }
 
@@ -401,7 +420,7 @@ public class App {
                 break;
             default:
                 System.out.println(ANSI_RED + "Pilihan Pembayaran tidak valid."+ ANSI_RESET);
-                return;
+                return "gagal";
         }
 
         // Continue with promo code logic
@@ -419,10 +438,10 @@ public class App {
             if (promoChoice.equalsIgnoreCase("Ya") || promoChoice.equalsIgnoreCase("Tidak")) {
                 if (promoChoice.equalsIgnoreCase("Ya")) {
 
-                    if (users.get(userIndex).isMember()) {
+                    if (users.get(userIndex).isMembershipActive()) {
                         double discount = totalbiaya * users.get(userIndex).membership.getDiscountRate();
                         totalbiaya -= discount;
-                        System.out.println("Diskon keanggotaan diterapkan : Rp. " + discount);
+                        System.out.println("Diskon keanggotaan diterapkan, Anda mendapatkan Diskon sebesar : Rp. " + discount);
                     }
 
                         System.out.print("Apakah Anda memiliki kode diskon? (Ya/Tidak) : ");
@@ -472,6 +491,9 @@ public class App {
         bookings[userIndex][6] = String.valueOf(totalCostWithUniqueCode);
 
         printPaymentReceipt(bookings, userIndex, uniqueCode);
+        statusReservasi = "berhasil";
+
+        return statusReservasi;
     
 
     }
@@ -558,6 +580,7 @@ public class App {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 System.out.println("Tanggal Lahir  : " + sdf.format(user.tanggalLahir));
                 System.out.println("NIK            : " + user.nik);
+                System.out.println("Membership     : " + user.membership);
                 return;
             }
         }
@@ -588,9 +611,9 @@ public class App {
                 System.out.println("Nama Pengguna       : " + registerednamaPengguna.get(i));
                 System.out.println("Tipe Kamar          : " + bookings[i][0]);
                 System.out.println("Tanggal Pemesanan   :"+ bookings[i][1]);
-                System.out.println("Fasilitas           : " + bookings[i][2]);
+                System.out.println("Fasilitas tambahan  : " + bookings[i][2] + " " + bookings[i][11]);
                 System.out.println("Rating              : " + bookings[i][3]);
-                System.out.println("Ulasan              :"+ bookings[i][4]);
+                System.out.println("Ulasan              : "+ bookings[i][4]);
                 if (bookings[i][6] != null) {
                     System.out.println("Kritik/Saran        : " + bookings[i][6]);
                 }
@@ -662,7 +685,7 @@ public class App {
                 System.out.println("Nama Pengguna     : " + registerednamaPengguna.get(i));
                 System.out.println("Tipe Kamar        : " + bookings[i][0]);
                 System.out.println("Tanggal Pemesanan :"+bookings[i][1]);
-                System.out.println("Fasilitas         : " + bookings[i][2]);
+                System.out.println("Fasilitas Tambahan  : " + bookings[userIndex][2] + " " + bookings[userIndex][11]);
                 System.out.println("Pembayaran        : " + bookings[i][5]);
                 System.out.println("Status Check-in   : " + (bookings[i][8] != null ? bookings[i][8] : "Belum Check-in"));
                 System.out.println("═══════════════════════════════════════");
@@ -723,31 +746,32 @@ public class App {
         }
     }
 
-    private static void purchaseMembership(User user, Scanner input) {
-        System.out.println("Anda akan membeli membership dengan biaya Rp 200,000 per bulan.");
-        System.out.print("Apakah Anda ingin melanjutkan? (Ya/Tidak) : ");
-        String response = input.nextLine();
+    private static void handleMembership(User user, Scanner input) {
+        if (!user.isMembershipActive()) {
+            System.out.println("Anda belum menjadi member atau membership Anda telah kedaluwarsa.");
+            System.out.println("Anda akan membeli membership dengan biaya Rp 200.000 per bulan.");
+            System.out.print("Apakah Anda ingin melanjutkan? (Ya/Tidak) : ");
+            String response = input.nextLine();
     
-        if (response.equalsIgnoreCase("Ya")) {
-            System.out.println("Silakan bayar biaya membership sekarang : Rp 200,000. ");
-            System.out.print("Masukkan jumlah yang dibayar : ");
-            int amount = input.nextInt();
-            input.nextLine(); // Consume newline
+            if (response.equalsIgnoreCase("Ya")) {
+                System.out.println("Silakan bayar biaya membership sekarang : Rp 200.000. ");
+                System.out.print("Masukkan jumlah yang dibayar : ");
+                int amount = input.nextInt();
+                input.nextLine(); // Consume newline
     
-            if (amount >= 200000) {
-                user.membership.isActive = true;
-                System.out.println(ANSI_GREEN + "Pembayaran berhasil. Membership Anda sekarang aktif!" + ANSI_RESET);
-                user.membership.isActive = true;
+                if (amount >= 200000) {
+                    user.activateMembership(); // Metode ini akan menetapkan tanggal aktivasi dan kedaluwarsa
+                    System.out.println(ANSI_GREEN + "Pembayaran berhasil. Membership Anda sekarang aktif hingga " + user.membershipExpirationDate + ANSI_RESET);
+                } else {
+                    System.out.println(ANSI_RED + "Pembayaran gagal. Jumlah yang dibayar tidak cukup." + ANSI_RESET);
+                }
             } else {
-                System.out.println(ANSI_RED + "Pembayaran gagal. Jumlah yang dibayar tidak cukup." + ANSI_RESET);
+                System.out.println("Pembelian membership dibatalkan.");
             }
         } else {
-            System.out.println("Pembelian membership dibatalkan.");
+            System.out.println("Anda sudah menjadi member. Membership Anda aktif hingga " + user.membershipExpirationDate);
         }
     }
-    
-
-
 
 
     public static void main(String[] args) {
@@ -765,6 +789,7 @@ public class App {
         boolean loggedIn = false;
         String statusPemesanan = "Belum Dipesan";
         String statusCheckIn = "belum";
+        String statusReservasi = "gagal";
 
         initializeUnavailableDates();
 
@@ -841,7 +866,7 @@ public class App {
             System.out.println(  "║   " + ANSI_BLUE +  "  1. PEMESANAN KAMAR                                                                                                        "+ ANSI_RESET +"║");
             System.out.println(  "║   " + ANSI_GREEN+  "  2. CHECK-IN                                                                                                               "+ ANSI_RESET +"║");
             System.out.println(  "║   " + ANSI_RED  +  "  3. CHECK-OUT                                                                                                              "+ ANSI_RESET +"║");
-            System.out.println(  "║   " + ANSI_PURPLE + "  4. BELI MEMBERSHIP (Rp 200,000/Bulan)                                                                                     "+ ANSI_RESET +"║"); 
+            System.out.println(  "║   " + ANSI_PURPLE + "  4. MEMBERSHIP                                                                                                             "+ ANSI_RESET +"║"); 
             System.out.println(  "║   " + ANSI_YELLOW+ "  5. LOG-OUT                                                                                                                "+ ANSI_RESET +"║"); 
             System.out.println("╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝");
             System.out.print  ("  Silakan pilih opsi (1-5) : ");
@@ -855,7 +880,11 @@ public class App {
                         System.out.println(ANSI_RED + "Anda sudah memesan kamar. Silakan check-in atau check-out terlebih dahulu." + ANSI_RESET);
                     } else if (statusPemesanan.equals("Belum Dipesan")) {
                         makeBooking(users, stockRooms, bookings, userIndex, input);
-                        statusPemesanan = "Dipesan";
+                        String hasilReservasi = makeBooking(users, stockRooms, bookings, userIndex, input);
+
+                        if (hasilReservasi.equals("berhasil")) {
+                            statusPemesanan = "Dipesan";
+                        }
                         break;
                     } 
                 
@@ -888,7 +917,7 @@ public class App {
                     System.out.println(ANSI_CYAN + "Tipe Kamar              : " + ANSI_RESET + bookings[userIndex][0] );
                     System.out.println(ANSI_CYAN + "Jumlah Malam            : " + ANSI_RESET + bookings[userIndex][7] );
                     System.out.println(ANSI_CYAN + "Status Check-in Anda    : " + ANSI_YELLOW + statusCheckIn );
-                    System.out.println(ANSI_CYAN + "Tanggal Reservasi       :"+ANSI_RESET+bookings[userIndex][1] );
+                    System.out.println(ANSI_CYAN + "Tanggal Reservasi       :" +ANSI_RESET+bookings[userIndex][1] );
                     System.out.println(ANSI_CYAN + "Fasilitas Tambahan      : " + ANSI_RESET + bookings[userIndex][2] + "," + bookings[userIndex][11]);
                     System.out.println(ANSI_CYAN + "Pembayaran              : " + ANSI_RESET + bookings[userIndex][5] );
                     System.out.println(ANSI_CYAN + "Total Biaya             : " + ANSI_RESET + "Rp. "  + bookings[userIndex][6] );
@@ -941,7 +970,7 @@ public class App {
                             System.out.println("Terimakasih atas masukan dan sarannya, Kami mohon maaf yang sebesar - besarnya");
                             }
                     
-                    statusPemesanan = "Belum";
+                    statusPemesanan = "Belum Dipesan";
                     
             
                         }
@@ -957,7 +986,7 @@ public class App {
                     break;
                 
                 case 4:
-                    purchaseMembership(currentUser, input);
+                    handleMembership(currentUser, input);
                 break;    
 
                 case 5:
@@ -974,7 +1003,7 @@ public class App {
             System.out.println(  "║ "+ANSI_CYAN+"                                                          ░█░█░█▀▀░█░█░█░█                                                    "+ ANSI_RESET +"║");
             System.out.println(  "║ "+ANSI_CYAN+"                                                          ░▀░▀░▀▀▀░▀░▀░▀▀▀                                                    "+ ANSI_RESET +"║");
             System.out.println("║═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════║");
-            System.out.println("║     1. Lihat Pemesanan                                                                                                        ║");
+            System.out.println(  "║  "+ANSI_BOLD+"   1. Lihat Pemesanan                                                                                                        ║");
             System.out.println("║     2. Menyetujui Check-in                                                                                                    ║");
             System.out.println("║     3. Menyetujui Check-Out                                                                                                   ║");
             System.out.println("║     4. Masukan Pelanggan                                                                                                      ║");
@@ -982,7 +1011,7 @@ public class App {
             System.out.println("║     6. Lihat Data Diri Pelanggan                                                                                              ║");
             System.out.println("║     7. Hapus Akun Pelanggan                                                                                                   ║");
             System.out.println("║     8. Kelola Diskon                                                                                                          ║");
-            System.out.println("║     9. Log-Out                                                                                                                ║");            
+            System.out.println(  "║     9. Log-Out                                                                                                      "+ANSI_RESET+"          ║");            
             System.out.println(  "╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝" + ANSI_RESET);
             System.out.print("Pilih Menu : ");
             int adminChoice = input.nextInt();
