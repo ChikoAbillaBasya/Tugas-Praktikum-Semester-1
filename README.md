@@ -1,7 +1,7 @@
 
 <div align="center">
 	<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original-wordmark.svg" width="120" alt="Java Logo"/>
-	<h1>📚 Tugas Praktikum Dasar Pemrograman</h1>
+	<h1>📚 Praktikum Dasar Pemrograman</h1>
 	<b>Semester 1 - Teknik Informatika Politeknik Negeri Malang</b><br>
 	<img src="https://img.shields.io/badge/Java-Programming-blue?logo=java"/>
 	<img src="https://img.shields.io/badge/Praktikum-2025-success?style=flat-square"/>
