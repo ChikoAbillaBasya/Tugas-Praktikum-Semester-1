@@ -46,7 +46,7 @@ Repositori ini berisi kumpulan tugas dan latihan praktikum pemrograman dasar men
 	 ```
 
 
-## 👤 Data Diri
+## 👤 Tentang Saya
 
 | Nama                | NIM        | Kelas | Prodi                  |
 |---------------------|------------|-------|------------------------|
